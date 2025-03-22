@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Связи
+  createdTasks  Task[]       @relation("TaskCreator")
+  submissions   Submission[] @relation("StudentSubmissions")
+  assignedTasks Task[]       @relation("AssignedStudents")
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Связи
+  creatorId   String
+  creator     User         @relation("TaskCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+  students    User[]       @relation("AssignedStudents")
+}
+
+model Submission {
+  id        String   @id @default(uuid())
+  answer    String
+  score     Int?
+  feedback  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Связи
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User     @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+}
