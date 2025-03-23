@@ -24,11 +24,13 @@
         :key="submission.id"
         class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow"
       >
-        <div class="flex justify-between items-start">
-          <div>
+        <div
+          class="flex flex-col md:flex-row md:justify-between md:items-start"
+        >
+          <div class="mb-4 md:mb-0 md:mr-4 w-full md:w-auto">
             <router-link
               :to="`/tasks/${submission.task.id}`"
-              class="text-lg font-medium text-blue-600 hover:text-blue-800"
+              class="text-lg font-medium text-blue-600 hover:text-blue-800 block"
             >
               {{ submission.task.title }}
             </router-link>
@@ -37,7 +39,9 @@
             </p>
           </div>
 
-          <div class="ml-4 flex flex-col items-end">
+          <div
+            class="md:ml-4 flex flex-row md:flex-col items-center md:items-end md:flex-shrink-0"
+          >
             <div class="flex items-center">
               <span class="text-sm text-gray-500 mr-2">Оценка:</span>
               <span
@@ -59,7 +63,7 @@
             </div>
             <p
               v-if="submission.feedback"
-              class="text-sm text-gray-600 mt-2 max-w-xs text-right"
+              class="text-sm text-gray-600 mt-2 md:max-w-xs md:text-right w-full"
             >
               {{ submission.feedback }}
             </p>
@@ -67,9 +71,9 @@
         </div>
 
         <div
-          class="flex justify-between items-center mt-3 text-sm text-gray-500"
+          class="flex flex-col md:flex-row md:justify-between md:items-center mt-3 text-sm text-gray-500"
         >
-          <span
+          <span class="mb-1 md:mb-0"
             >Дата создания: {{ formatDate(submission.task.createdAt) }}</span
           >
           <span>Отправлено: {{ formatDate(submission.createdAt) }}</span>

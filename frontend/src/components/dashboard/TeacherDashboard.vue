@@ -3,15 +3,15 @@
     <h2 class="text-xl font-semibold mb-4">Управление заданиями</h2>
 
     <!-- Tabs -->
-    <div class="border-b border-gray-200 mb-6">
-      <nav class="-mb-px flex space-x-8">
+    <div class="border-b border-gray-200 mb-6 overflow-x-auto">
+      <nav class="-mb-px flex space-x-6">
         <button
           @click="activeTab = 'tasks'"
           :class="[
             activeTab === 'tasks'
               ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+            'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
           ]"
         >
           Ваши задания
@@ -22,13 +22,13 @@
             activeTab === 'submissions'
               ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+            'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
           ]"
         >
           Ответы на проверку
           <span
             v-if="pendingCount > 0"
-            class="ml-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs"
+            class="inline-flex items-center justify-center ml-1 px-2 py-0.5 text-xs font-medium rounded-full bg-red-500 text-white"
           >
             {{ pendingCount }}
           </span>
@@ -40,7 +40,7 @@
     <div v-if="activeTab === 'tasks'" class="mb-6">
       <router-link
         to="/tasks/create"
-        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+        class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +80,7 @@
       <div v-if="activeTab === 'tasks'" class="mt-4">
         <router-link
           to="/tasks/create"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200"
+          class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 w-full sm:w-auto"
         >
           Создать первое задание
         </router-link>
@@ -94,8 +94,10 @@
         :key="task.id"
         class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow"
       >
-        <div class="flex justify-between items-start">
-          <div>
+        <div
+          class="flex flex-col md:flex-row md:justify-between md:items-start"
+        >
+          <div class="mb-4 md:mb-0">
             <router-link
               :to="`/tasks/${task.id}`"
               class="text-lg font-medium text-blue-600 hover:text-blue-800"
@@ -107,10 +109,10 @@
             </p>
           </div>
 
-          <div class="ml-4">
+          <div class="md:ml-4">
             <router-link
               :to="`/tasks/${task.id}`"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+              class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
             >
               Просмотреть задание
             </router-link>
@@ -118,9 +120,11 @@
         </div>
 
         <div
-          class="flex justify-between items-center mt-3 text-sm text-gray-500"
+          class="flex flex-col md:flex-row md:justify-between md:items-center mt-3 text-sm text-gray-500"
         >
-          <span>Дата создания: {{ formatDate(task.createdAt) }}</span>
+          <span class="mb-1 md:mb-0"
+            >Дата создания: {{ formatDate(task.createdAt) }}</span
+          >
           <span>
             <span
               :class="[
@@ -144,18 +148,20 @@
         :key="submission.id"
         class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow"
       >
-        <div class="flex justify-between items-start">
-          <div>
-            <div class="flex items-center">
+        <div
+          class="flex flex-col md:flex-row md:justify-between md:items-start"
+        >
+          <div class="w-full">
+            <div class="flex flex-wrap items-center">
               <router-link
                 :to="`/tasks/${submission.task.id}`"
-                class="text-lg font-medium text-blue-600 hover:text-blue-800"
+                class="text-lg font-medium text-blue-600 hover:text-blue-800 mr-2"
               >
                 {{ submission.task.title }}
               </router-link>
               <span
                 v-if="!submission.score"
-                class="ml-2 bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full"
+                class="mt-1 inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full"
               >
                 Не оценено
               </span>
@@ -175,8 +181,8 @@
 
         <div v-if="!submission.score" class="mt-3">
           <form @submit.prevent="gradeSubmission(submission)">
-            <div class="flex flex-col md:flex-row gap-3">
-              <div class="flex-1">
+            <div class="flex flex-col gap-3">
+              <div class="w-full">
                 <label
                   for="feedback"
                   class="block text-sm font-medium text-gray-700 mb-1"
@@ -191,44 +197,46 @@
                 ></textarea>
               </div>
 
-              <div class="w-32">
-                <label
-                  for="score"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Оценка (0-100)</label
-                >
-                <input
-                  id="score"
-                  v-model.number="submission.scoreDraft"
-                  type="number"
-                  min="0"
-                  max="100"
-                  class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md"
-                  required
-                />
-              </div>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <div class="w-full sm:w-32">
+                  <label
+                    for="score"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Оценка (0-100)</label
+                  >
+                  <input
+                    id="score"
+                    v-model.number="submission.scoreDraft"
+                    type="number"
+                    min="0"
+                    max="100"
+                    class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
 
-              <div class="flex items-end">
-                <button
-                  type="submit"
-                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-                  :disabled="submission.grading"
-                >
-                  <span v-if="submission.grading">Сохранение...</span>
-                  <span v-else>Оценить</span>
-                </button>
+                <div class="flex items-end">
+                  <button
+                    type="submit"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                    :disabled="submission.grading"
+                  >
+                    <span v-if="submission.grading">Сохранение...</span>
+                    <span v-else>Оценить</span>
+                  </button>
+                </div>
               </div>
             </div>
           </form>
         </div>
 
         <div v-else class="mt-3 bg-gray-100 p-3 rounded border border-gray-200">
-          <div class="flex justify-between">
-            <div>
+          <div class="flex flex-col md:flex-row md:justify-between">
+            <div class="mb-2 md:mb-0">
               <p class="text-sm text-gray-500">Оценка:</p>
               <p class="font-medium">{{ submission.score }}/100</p>
             </div>
-            <div v-if="submission.feedback" class="ml-4">
+            <div v-if="submission.feedback" class="md:ml-4">
               <p class="text-sm text-gray-500">Комментарий:</p>
               <p class="text-gray-700">{{ submission.feedback }}</p>
             </div>
@@ -236,9 +244,9 @@
         </div>
 
         <div
-          class="flex justify-between items-center mt-3 text-sm text-gray-500"
+          class="flex flex-col md:flex-row md:justify-between md:items-center mt-3 text-sm text-gray-500"
         >
-          <span
+          <span class="mb-1 md:mb-0"
             >Задание создано: {{ formatDate(submission.task.createdAt) }}</span
           >
           <span>Ответ отправлен: {{ formatDate(submission.createdAt) }}</span>
