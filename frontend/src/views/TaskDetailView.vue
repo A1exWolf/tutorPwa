@@ -46,6 +46,58 @@
           </p>
         </div>
 
+        <!-- Teacher information -->
+        <div v-if="task.creator" class="mb-4 flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-2 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+          <span class="text-gray-700">
+            Преподаватель:
+            <span class="font-medium"
+              >{{ task.creator.firstName }} {{ task.creator.lastName }}</span
+            >
+          </span>
+        </div>
+
+        <!-- Task status badges -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span
+            v-if="isTeacher"
+            class="px-2 py-1 text-xs rounded-full"
+            :class="
+              task.public
+                ? 'bg-green-100 text-green-800'
+                : 'bg-gray-100 text-gray-800'
+            "
+          >
+            {{ task.public ? "Публичное" : "Приватное" }}
+          </span>
+
+          <span
+            v-if="isTeacher"
+            class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
+          >
+            Назначено: {{ task.students?.length || 0 }} студентам
+          </span>
+
+          <span
+            class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs"
+          >
+            Решений: {{ task.submissions?.length || 0 }}
+          </span>
+        </div>
+
         <div class="text-sm text-gray-500 mb-2">
           <span>Создано: {{ formatDate(task.createdAt) }}</span>
         </div>
@@ -128,17 +180,37 @@
           <div
             v-for="sub in task.submissions"
             :key="sub.id"
-            class="bg-white shadow-md rounded-lg p-4"
+            class="bg-white shadow-md rounded-lg p-4 relative"
+            :class="{
+              'border-l-4 border-green-500': sub.score !== null,
+              'border-l-4 border-yellow-500': sub.score === null,
+            }"
           >
-            <div class="flex justify-between mb-2">
-              <div>
-                <span class="font-semibold"
-                  >{{ sub.student?.firstName }}
-                  {{ sub.student?.lastName }}</span
+            <!-- Student info header with badge -->
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 mr-2 text-gray-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                <span class="text-gray-500 text-sm ml-2">{{
-                  formatDate(sub.createdAt)
-                }}</span>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                <div>
+                  <div v-if="sub.student" class="font-semibold text-blue-700">
+                    {{ sub.student.firstName }} {{ sub.student.lastName }}
+                  </div>
+                  <div v-else class="font-semibold text-blue-700">
+                    Информация о студенте не доступна
+                  </div>
+                </div>
               </div>
               <div>
                 <span
@@ -156,18 +228,28 @@
               </div>
             </div>
 
+            <!-- Submission time -->
+            <div class="text-gray-500 text-xs mb-3">
+              Отправлено: {{ formatDate(sub.createdAt) }}
+            </div>
+
+            <!-- Student answer -->
             <div class="bg-gray-50 p-3 rounded mb-3">
+              <h4 class="text-sm font-semibold mb-2">Ответ студента:</h4>
               <p class="whitespace-pre-wrap">{{ sub.answer }}</p>
             </div>
 
+            <!-- Grading form for teachers -->
             <form
               v-if="sub.score === null"
               @submit.prevent="gradeSubmission(sub.id)"
+              class="border-t pt-3 mt-3"
             >
+              <h4 class="text-sm font-semibold mb-2">Оценка работы:</h4>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-gray-700 text-sm font-bold mb-2">
-                    Оценка
+                    Балл (0-100)
                   </label>
                   <input
                     type="number"
@@ -176,6 +258,7 @@
                     max="100"
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     placeholder="0-100"
+                    required
                   />
                 </div>
                 <div class="md:col-span-2">
@@ -200,11 +283,20 @@
               </div>
             </form>
 
-            <div v-else-if="sub.feedback" class="mt-2">
-              <p class="text-sm">
-                <span class="font-semibold">Комментарий:</span>
-                <span class="whitespace-pre-wrap">{{ sub.feedback }}</span>
-              </p>
+            <!-- Already graded info -->
+            <div v-else class="border-t pt-3 mt-3">
+              <div class="flex items-center text-sm">
+                <span class="font-semibold mr-2">Оценка:</span>
+                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full"
+                  >{{ sub.score }} баллов</span
+                >
+              </div>
+              <div v-if="sub.feedback" class="mt-2">
+                <p class="text-sm">
+                  <span class="font-semibold">Комментарий:</span>
+                  <span class="whitespace-pre-wrap">{{ sub.feedback }}</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -280,6 +372,12 @@ const fetchTask = async () => {
       }
     );
     task.value = response.data;
+
+    // Log data to check student info
+    console.log("Task data:", task.value);
+    if (task.value.submissions) {
+      console.log("Submissions:", task.value.submissions);
+    }
 
     // Initialize grading data for teacher
     if (isTeacher.value && task.value.submissions) {

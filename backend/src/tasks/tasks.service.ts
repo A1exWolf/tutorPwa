@@ -33,7 +33,11 @@ export class TasksService {
       },
       include: {
         creator: true,
-        submissions: true,
+        submissions: {
+          include: {
+            student: true,
+          },
+        },
         students: true,
       },
     });
@@ -46,7 +50,11 @@ export class TasksService {
       },
       include: {
         creator: true,
-        submissions: true,
+        submissions: {
+          include: {
+            student: true,
+          },
+        },
         students: true,
       },
     });
@@ -68,6 +76,9 @@ export class TasksService {
           where: {
             studentId: studentId,
           },
+          include: {
+            student: true,
+          },
         },
         students: true,
       },
@@ -88,6 +99,9 @@ export class TasksService {
           where: {
             studentId: studentId,
           },
+          include: {
+            student: true,
+          },
         },
         students: true,
       },
@@ -102,7 +116,11 @@ export class TasksService {
       where: { id },
       include: {
         creator: true,
-        submissions: true,
+        submissions: {
+          include: {
+            student: true,
+          },
+        },
         students: true,
       },
     });
