@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
 import Header from "./components/Header.vue";
+import PwaInstallPrompt from "./components/PwaInstallPrompt.vue";
 import { onMounted } from "vue";
 import { useAuthStore } from "./stores/auth";
 
@@ -21,6 +22,7 @@ onMounted(async () => {
     <main class="container mx-auto py-8 px-4">
       <router-view />
     </main>
+    <PwaInstallPrompt />
   </div>
 </template>
 
