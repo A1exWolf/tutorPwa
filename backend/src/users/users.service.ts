@@ -100,4 +100,67 @@ export class UsersService {
       where: { email },
     });
   }
+
+  async getUserStats(userId: string) {
+    const user = await this.findOne(userId);
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    if (user.role === UserRole.STUDENT) {
+      // Get stats for student
+      const completedSubmissions = await this.prisma.submission.findMany({
+        where: {
+          studentId: userId,
+        },
+        include: {
+          task: true,
+        },
+      });
+
+      // Calculate statistics
+      const completedTasksCount = completedSubmissions.length;
+
+      // Calculate average score if there are graded submissions
+      const gradedSubmissions = completedSubmissions.filter(
+        (s) => s.score !== null,
+      );
+      const averageScore =
+        gradedSubmissions.length > 0
+          ? gradedSubmissions.reduce(
+              (acc, sub) => acc + (sub.score as number),
+              0,
+            ) / gradedSubmissions.length
+          : 0;
+
+      return {
+        completedTasksCount,
+        averageScore,
+      };
+    } else {
+      // Get stats for teacher
+      const createdTasksCount = await this.prisma.task.count({
+        where: {
+          creatorId: userId,
+        },
+      });
+
+      const gradedSubmissionsCount = await this.prisma.submission.count({
+        where: {
+          task: {
+            creatorId: userId,
+          },
+          score: {
+            not: null,
+          },
+        },
+      });
+
+      return {
+        createdTasksCount,
+        gradedSubmissionsCount,
+      };
+    }
+  }
 }

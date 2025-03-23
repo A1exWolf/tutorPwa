@@ -126,7 +126,7 @@ export class TasksService {
     });
 
     if (!task) {
-      throw new NotFoundException('Задание не найдено');
+      throw new NotFoundException(`Task with ID ${id} not found`);
     }
 
     return task;
@@ -135,15 +135,16 @@ export class TasksService {
   async remove(id: string, teacherId: string) {
     const task = await this.prisma.task.findUnique({
       where: { id },
-      select: { creatorId: true },
     });
 
     if (!task) {
-      throw new NotFoundException('Задание не найдено');
+      throw new NotFoundException(`Task with ID ${id} not found`);
     }
 
     if (task.creatorId !== teacherId) {
-      throw new ForbiddenException('У вас нет прав на удаление этого задания');
+      throw new ForbiddenException(
+        'You are not authorized to delete this task',
+      );
     }
 
     return this.prisma.task.delete({
@@ -185,6 +186,38 @@ export class TasksService {
     });
   }
 
+  async getStudentSubmissions(studentId: string) {
+    return this.prisma.submission.findMany({
+      where: {
+        studentId,
+      },
+      include: {
+        task: true,
+        student: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async getTeacherSubmissions(teacherId: string) {
+    return this.prisma.submission.findMany({
+      where: {
+        task: {
+          creatorId: teacherId,
+        },
+      },
+      include: {
+        task: true,
+        student: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   async gradeSubmission(
     submissionId: string,
     score: number,
@@ -202,7 +235,7 @@ export class TasksService {
 
     if (submission.task.creatorId !== teacherId) {
       throw new ForbiddenException(
-        'You can only grade submissions for your own tasks',
+        'You are not authorized to grade this submission',
       );
     }
 
@@ -213,8 +246,8 @@ export class TasksService {
         feedback,
       },
       include: {
-        student: true,
         task: true,
+        student: true,
       },
     });
   }

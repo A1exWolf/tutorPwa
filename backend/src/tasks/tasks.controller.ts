@@ -7,6 +7,7 @@ import {
   Param,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -28,8 +29,11 @@ export class TasksController {
   }
 
   @Get()
-  findAll(@Request() req) {
+  findAll(@Request() req, @Query('created') created: string) {
     if (req.user.role === UserRole.TEACHER) {
+      if (created === 'true') {
+        return this.tasksService.findAllByTeacher(req.user.id);
+      }
       return this.tasksService.findAllByTeacher(req.user.id);
     }
     return this.tasksService.findAllByStudent(req.user.id);
@@ -53,6 +57,18 @@ export class TasksController {
     @Request() req,
   ) {
     return this.tasksService.createSubmission(createSubmissionDto, req.user.id);
+  }
+
+  @Get('submission/student')
+  @Roles(UserRole.STUDENT)
+  getStudentSubmissions(@Request() req) {
+    return this.tasksService.getStudentSubmissions(req.user.id);
+  }
+
+  @Get('submission/teacher')
+  @Roles(UserRole.TEACHER)
+  getTeacherSubmissions(@Request() req) {
+    return this.tasksService.getTeacherSubmissions(req.user.id);
   }
 
   @Post('submission/:id/grade')

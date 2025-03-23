@@ -24,4 +24,6 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped></style>
+<style>
+/* Add any global styles here */
+</style>
