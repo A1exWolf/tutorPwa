@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateTaskDto {
@@ -16,6 +17,10 @@ export class CreateTaskDto {
   @IsNotEmpty()
   @MinLength(10)
   description: string;
+
+  @IsBoolean()
+  @IsOptional()
+  public?: boolean;
 
   @IsArray()
   @IsOptional()

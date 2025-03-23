@@ -138,6 +138,18 @@
         </div>
       </div>
 
+      <div class="form-group form-check">
+        <input
+          id="public"
+          v-model="isPublic"
+          type="checkbox"
+          class="form-check-input"
+        />
+        <label for="public" class="form-check-label">
+          Публичное задание (доступно всем студентам)
+        </label>
+      </div>
+
       <div class="flex justify-end">
         <button
           type="submit"
@@ -157,21 +169,25 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useTaskStore } from "../stores/tasks";
 import { useUsersStore } from "../stores/users";
+import { useAuthStore } from "@/stores/auth";
 
 const router = useRouter();
 const taskStore = useTaskStore();
 const usersStore = useUsersStore();
+const authStore = useAuthStore();
 
 const task = ref({
   title: "",
   description: "",
   studentIds: [],
+  public: false,
 });
 
 const selectedStudent = ref("");
 const validationErrors = ref({});
 const error = computed(() => taskStore.error || usersStore.error);
 const loading = computed(() => taskStore.loading);
+const isPublic = ref(false);
 
 // Получить список доступных студентов (которые еще не выбраны)
 const availableStudents = computed(() => {
@@ -241,10 +257,93 @@ const submitForm = async () => {
   }
 
   try {
-    await taskStore.createTask(task.value);
+    const studentIds = task.value.studentIds;
+    await taskStore.createTask({
+      title: task.value.title,
+      description: task.value.description,
+      studentIds,
+      public: isPublic.value,
+    });
     router.push("/tasks");
   } catch (err) {
     console.error("Failed to create task:", err);
   }
 };
 </script>
+
+<style scoped>
+.create-task-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.task-form {
+  margin-top: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+select[multiple] {
+  height: 150px;
+}
+
+.btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.alert {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.form-text {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.form-check-input {
+  margin-right: 10px;
+}
+</style>

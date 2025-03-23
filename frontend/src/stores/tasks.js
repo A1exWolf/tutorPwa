@@ -37,11 +37,20 @@ export const useTaskStore = defineStore("tasks", () => {
     error.value = null;
 
     try {
-      const response = await axios.post(`${API_URL}/tasks`, taskData, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
+      const response = await axios.post(
+        `${API_URL}/tasks`,
+        {
+          title: taskData.title,
+          description: taskData.description,
+          studentIds: taskData.studentIds,
+          public: taskData.public || false,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
 
       // Add the new task to the tasks array
       tasks.value.push(response.data);

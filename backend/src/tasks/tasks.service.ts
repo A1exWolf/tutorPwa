@@ -53,7 +53,8 @@ export class TasksService {
   }
 
   async findAllByStudent(studentId: string) {
-    return this.prisma.task.findMany({
+    // First get all tasks assigned to this student
+    const assignedTasks = await this.prisma.task.findMany({
       where: {
         students: {
           some: {
@@ -68,8 +69,32 @@ export class TasksService {
             studentId: studentId,
           },
         },
+        students: true,
       },
     });
+
+    // Then get all public tasks
+    const publicTasks = await this.prisma.task.findMany({
+      where: {
+        public: true,
+        // Exclude tasks that are already in assignedTasks
+        id: {
+          notIn: assignedTasks.map((task) => task.id),
+        },
+      },
+      include: {
+        creator: true,
+        submissions: {
+          where: {
+            studentId: studentId,
+          },
+        },
+        students: true,
+      },
+    });
+
+    // Combine the two sets of tasks, with assigned tasks first
+    return [...assignedTasks, ...publicTasks];
   }
 
   async findOne(id: string) {
@@ -121,7 +146,11 @@ export class TasksService {
       throw new NotFoundException('Task not found');
     }
 
-    if (!task.students.some((student) => student.id === studentId)) {
+    // Allow submissions if the task is public or the student is assigned
+    const isAssigned = task.students.some(
+      (student) => student.id === studentId,
+    );
+    if (!task.public && !isAssigned) {
       throw new ForbiddenException('You do not have access to this task');
     }
 

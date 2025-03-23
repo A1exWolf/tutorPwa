@@ -36,10 +36,20 @@
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Task heading for student view, showing assignments at top -->
+      <template v-if="!isTeacher && assignedTasks.length > 0">
+        <div class="col-span-full mb-2 mt-4">
+          <h2 class="text-xl font-semibold text-gray-700">
+            Назначенные задания
+          </h2>
+        </div>
+      </template>
+
+      <!-- Display assigned tasks first -->
       <div
-        v-for="task in taskStore.tasks"
+        v-for="task in assignedTasks"
         :key="task.id"
-        class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer"
+        class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-blue-500"
         @click="navigateToTask(task.id)"
       >
         <div class="flex justify-between">
@@ -69,6 +79,20 @@
         <div class="flex justify-between text-sm text-gray-500">
           <span>Студентов: {{ task.students?.length || 0 }}</span>
           <span>Решений: {{ task.submissions?.length || 0 }}</span>
+        </div>
+
+        <!-- Task visibility badge -->
+        <div v-if="isTeacher" class="mt-2">
+          <span
+            class="px-2 py-1 text-xs rounded-full mr-2"
+            :class="
+              task.public
+                ? 'bg-green-100 text-green-800'
+                : 'bg-gray-100 text-gray-800'
+            "
+          >
+            {{ task.public ? "Публичное" : "Приватное" }}
+          </span>
         </div>
 
         <!-- Student submission status -->
@@ -104,6 +128,71 @@
           </router-link>
         </div>
       </div>
+
+      <!-- Public tasks heading for student view -->
+      <template
+        v-if="!isTeacher && publicTasks.length > 0 && assignedTasks.length > 0"
+      >
+        <div class="col-span-full mb-2 mt-4">
+          <h2 class="text-xl font-semibold text-gray-700">
+            Другие доступные задания
+          </h2>
+        </div>
+      </template>
+
+      <!-- Display public tasks for students -->
+      <div
+        v-for="task in publicTasks"
+        :key="task.id"
+        class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-green-500"
+        @click="navigateToTask(task.id)"
+      >
+        <div class="flex justify-between">
+          <h2 class="text-xl font-semibold mb-2">{{ task.title }}</h2>
+        </div>
+        <p class="text-gray-600 mb-4 line-clamp-2">{{ task.description }}</p>
+        <div class="flex justify-between text-sm text-gray-500">
+          <span
+            class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs"
+          >
+            Публичное задание
+          </span>
+          <span>Решений: {{ task.submissions?.length || 0 }}</span>
+        </div>
+
+        <!-- Student submission status -->
+        <div v-if="!isTeacher" class="mt-3 pt-3 border-t border-gray-100">
+          <div v-if="hasSubmitted(task)" class="text-sm">
+            <span
+              v-if="getSubmissionScore(task) !== null"
+              class="px-2 py-1 bg-green-100 text-green-800 rounded-full"
+            >
+              Проверено: {{ getSubmissionScore(task) }}
+            </span>
+            <span
+              v-else
+              class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full"
+            >
+              Отправлено на проверку
+            </span>
+          </div>
+          <div v-else class="text-sm">
+            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+              Нужно решить
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-3 flex justify-end">
+          <router-link
+            :to="`/tasks/${task.id}`"
+            class="text-blue-500 hover:text-blue-700 text-sm font-medium"
+            @click.stop
+          >
+            Открыть задание →
+          </router-link>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -121,6 +210,31 @@ const authStore = useAuthStore();
 const loading = computed(() => taskStore.loading);
 const error = computed(() => taskStore.error);
 const isTeacher = computed(() => authStore.user?.role === "TEACHER");
+
+// For students: split tasks into assigned and public
+const assignedTasks = computed(() => {
+  if (isTeacher.value) {
+    return taskStore.tasks; // Teachers see all their tasks in one list
+  } else {
+    // For students, find tasks that are directly assigned to them
+    return taskStore.tasks.filter((task) =>
+      task.students.some((student) => student.id === authStore.user.id)
+    );
+  }
+});
+
+// Public tasks that are not assigned to the student
+const publicTasks = computed(() => {
+  if (isTeacher.value) {
+    return []; // Teachers don't need a separate public tasks section
+  } else {
+    // Only show public tasks that aren't already in assigned tasks
+    const assignedIds = new Set(assignedTasks.value.map((task) => task.id));
+    return taskStore.tasks.filter(
+      (task) => task.public && !assignedIds.has(task.id)
+    );
+  }
+});
 
 // Check if the current student has submitted a solution for this task
 const hasSubmitted = (task) => {
