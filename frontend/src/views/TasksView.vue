@@ -39,13 +39,14 @@
       <div
         v-for="task in taskStore.tasks"
         :key="task.id"
-        class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow"
+        class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer"
+        @click="navigateToTask(task.id)"
       >
         <div class="flex justify-between">
           <h2 class="text-xl font-semibold mb-2">{{ task.title }}</h2>
           <button
             v-if="isTeacher"
-            @click="confirmDelete(task.id)"
+            @click.stop="confirmDelete(task.id)"
             class="text-red-500 hover:text-red-700"
           >
             <svg
@@ -64,10 +65,43 @@
             </svg>
           </button>
         </div>
-        <p class="text-gray-600 mb-4">{{ task.description }}</p>
+        <p class="text-gray-600 mb-4 line-clamp-2">{{ task.description }}</p>
         <div class="flex justify-between text-sm text-gray-500">
           <span>Студентов: {{ task.students?.length || 0 }}</span>
           <span>Решений: {{ task.submissions?.length || 0 }}</span>
+        </div>
+
+        <!-- Student submission status -->
+        <div v-if="!isTeacher" class="mt-3 pt-3 border-t border-gray-100">
+          <div v-if="hasSubmitted(task)" class="text-sm">
+            <span
+              v-if="getSubmissionScore(task) !== null"
+              class="px-2 py-1 bg-green-100 text-green-800 rounded-full"
+            >
+              Проверено: {{ getSubmissionScore(task) }}
+            </span>
+            <span
+              v-else
+              class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full"
+            >
+              Отправлено на проверку
+            </span>
+          </div>
+          <div v-else class="text-sm">
+            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+              Нужно решить
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-3 flex justify-end">
+          <router-link
+            :to="`/tasks/${task.id}`"
+            class="text-blue-500 hover:text-blue-700 text-sm font-medium"
+            @click.stop
+          >
+            {{ isTeacher ? "Управлять" : "Открыть задание" }} →
+          </router-link>
         </div>
       </div>
     </div>
@@ -76,15 +110,36 @@
 
 <script setup>
 import { onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 import { useTaskStore } from "../stores/tasks";
 import { useAuthStore } from "../stores/auth";
 
+const router = useRouter();
 const taskStore = useTaskStore();
 const authStore = useAuthStore();
 
 const loading = computed(() => taskStore.loading);
 const error = computed(() => taskStore.error);
 const isTeacher = computed(() => authStore.user?.role === "TEACHER");
+
+// Check if the current student has submitted a solution for this task
+const hasSubmitted = (task) => {
+  if (!task.submissions || isTeacher.value) return false;
+  return task.submissions.some((sub) => sub.studentId === authStore.user.id);
+};
+
+// Get the score for a student's submission
+const getSubmissionScore = (task) => {
+  if (!task.submissions || isTeacher.value) return null;
+  const submission = task.submissions.find(
+    (sub) => sub.studentId === authStore.user.id
+  );
+  return submission ? submission.score : null;
+};
+
+const navigateToTask = (taskId) => {
+  router.push(`/tasks/${taskId}`);
+};
 
 onMounted(async () => {
   try {
@@ -123,5 +178,12 @@ const confirmDelete = async (taskId) => {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

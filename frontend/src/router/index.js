@@ -33,12 +33,19 @@ const router = createRouter({
       component: () => import("../views/CreateTaskView.vue"),
       meta: { requiresAuth: true, requiresTeacher: true },
     },
-    // {
-    //   path: "/submissions",
-    //   name: "submissions",
-    //   component: () => import("../views/SubmissionsView.vue"),
-    //   meta: { requiresAuth: true, requiresStudent: true },
-    // },
+    {
+      path: "/tasks/:id",
+      name: "task-detail",
+      component: () => import("../views/TaskDetailView.vue"),
+      meta: { requiresAuth: true },
+      props: true,
+    },
+    {
+      path: "/submissions",
+      name: "submissions",
+      component: () => import("../views/SubmissionsView.vue"),
+      meta: { requiresAuth: true, requiresStudent: true },
+    },
     // {
     //   path: "/profile",
     //   name: "profile",
