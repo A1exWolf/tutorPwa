@@ -9,18 +9,18 @@ const router = createRouter({
       name: "home",
       component: () => import("../views/HomeView.vue"),
     },
-    // {
-    //   path: "/login",
-    //   name: "login",
-    //   component: () => import("../views/LoginView.vue"),
-    //   meta: { requiresGuest: true },
-    // },
-    // {
-    //   path: "/register",
-    //   name: "register",
-    //   component: () => import("../views/RegisterView.vue"),
-    //   meta: { requiresGuest: true },
-    // },
+    {
+      path: "/login",
+      name: "login",
+      component: () => import("../views/LoginView.vue"),
+      meta: { requiresGuest: true },
+    },
+    {
+      path: "/register",
+      name: "register",
+      component: () => import("../views/RegisterView.vue"),
+      meta: { requiresGuest: true },
+    },
     // {
     //   path: "/tasks",
     //   name: "tasks",
