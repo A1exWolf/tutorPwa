@@ -21,18 +21,18 @@ const router = createRouter({
       component: () => import("../views/RegisterView.vue"),
       meta: { requiresGuest: true },
     },
-    // {
-    //   path: "/tasks",
-    //   name: "tasks",
-    //   component: () => import("../views/TasksView.vue"),
-    //   meta: { requiresAuth: true },
-    // },
-    // {
-    //   path: "/tasks/create",
-    //   name: "create-task",
-    //   component: () => import("../views/CreateTaskView.vue"),
-    //   meta: { requiresAuth: true, requiresTeacher: true },
-    // },
+    {
+      path: "/tasks",
+      name: "tasks",
+      component: () => import("../views/TasksView.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/tasks/create",
+      name: "create-task",
+      component: () => import("../views/CreateTaskView.vue"),
+      meta: { requiresAuth: true, requiresTeacher: true },
+    },
     // {
     //   path: "/submissions",
     //   name: "submissions",

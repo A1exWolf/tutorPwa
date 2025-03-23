@@ -17,12 +17,16 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
-      return result;
+    try {
+      const user = await this.usersService.findOneByEmail(email);
+      if (user && (await bcrypt.compare(password, user.password))) {
+        const { password, ...result } = user;
+        return result;
+      }
+      return null;
+    } catch (error) {
+      return null;
     }
-    return null;
   }
 
   async login(user: any) {
@@ -34,19 +38,20 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    // Проверяем, существует ли пользователь
-    const existingUser = await this.usersService
-      .findByEmail(registerDto.email)
-      .catch(() => null);
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+    try {
+      // Создаем нового пользователя
+      const user = await this.usersService.create(registerDto);
+
+      // Возвращаем токен и данные пользователя
+      return this.login(user);
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new UnauthorizedException(
+        'Не удалось зарегистрировать пользователя',
+      );
     }
-
-    // Создаем нового пользователя
-    const user = await this.usersService.create(registerDto);
-
-    // Возвращаем токен и данные пользователя
-    return this.login(user);
   }
 
   async getCurrentUser(userId: string) {

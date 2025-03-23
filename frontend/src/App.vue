@@ -1,13 +1,25 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
 import Header from "./components/Header.vue";
+import { onMounted } from "vue";
+import { useAuthStore } from "./stores/auth";
+
+const authStore = useAuthStore();
+
+onMounted(async () => {
+  try {
+    await authStore.checkAuth();
+  } catch (error) {
+    console.error("Authentication check failed:", error);
+  }
+});
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50">
     <Header />
-    <main class="container mx-auto px-4 py-8">
-      <router-view></router-view>
+    <main class="container mx-auto py-8 px-4">
+      <router-view />
     </main>
   </div>
 </template>

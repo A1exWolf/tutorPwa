@@ -13,12 +13,23 @@ export class TasksService {
   constructor(private prisma: PrismaService) {}
 
   async create(createTaskDto: CreateTaskDto, teacherId: string) {
+    const { studentIds, ...taskData } = createTaskDto;
+
+    // Create task with proper connections
     return this.prisma.task.create({
       data: {
-        ...createTaskDto,
+        ...taskData,
         creator: {
           connect: { id: teacherId },
         },
+        // Connect students if studentIds are provided
+        ...(studentIds && studentIds.length > 0
+          ? {
+              students: {
+                connect: studentIds.map((id) => ({ id })),
+              },
+            }
+          : {}),
       },
       include: {
         creator: true,
