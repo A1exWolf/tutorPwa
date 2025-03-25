@@ -681,7 +681,7 @@ const gradeSubmission = async (submissionId) => {
     }
 
     await axios.post(
-      `http://localhost:3000/api/tasks/submission/${submissionId}/grade`,
+      `/api/tasks/submission/${submissionId}/grade`,
       { score, feedback: sub.newFeedback || "" },
       {
         headers: {
