@@ -1,0 +1,23 @@
+# Shared ignores
+**/node_modules
+**/dist
+**/.git
+**/.gitignore
+**/.env
+**/npm-debug.log
+**/README.md
+**/.DS_Store
+**/.vscode
+**/.idea
+
+# Frontend specific
+frontend/.npm
+frontend/.pnp
+frontend/coverage
+frontend/.cache
+frontend/public/build
+
+# Backend specific
+backend/coverage
+backend/test
+backend/.npm 

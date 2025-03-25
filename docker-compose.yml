@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: tutor-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tutor_pwa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend NestJS Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tutor-backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/tutor_pwa?schema=public
+      JWT_SECRET: super-secret-key-for-jwt-auth
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    command: >
+      sh -c "npx prisma migrate deploy && 
+             npm run start:prod"
+
+  # Frontend Vue Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tutor-frontend
+    restart: always
+    depends_on:
+      - backend
+
+  # Nginx for Routing and Static Files
+  nginx:
+    image: nginx:alpine
+    container_name: tutor-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:

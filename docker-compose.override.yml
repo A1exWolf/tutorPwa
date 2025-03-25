@@ -1,0 +1,38 @@
+version: "3.8"
+
+# This file is used to override the main docker-compose.yml settings for development
+services:
+  # PostgreSQL Database - expose on different port for development
+  postgres:
+    ports:
+      - "5433:5432" # Use a different port to avoid conflicts with local Postgres
+
+  # Backend - bind mount code for development
+  backend:
+    build:
+      target: builder # Use the builder stage instead of production
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    command: npm run start:dev
+    ports:
+      - "3000:3000"
+      - "9229:9229" # For debugging
+
+  # Frontend - bind mount code for development
+  frontend:
+    build:
+      target: builder # Use the builder stage instead
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173" # Vite dev server port
+    command: npm run dev
+
+  # Nginx - same as production but different ports
+  nginx:
+    ports:
+      - "80:80"
