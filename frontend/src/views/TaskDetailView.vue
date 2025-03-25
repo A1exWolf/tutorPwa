@@ -623,7 +623,7 @@ const fetchTask = async () => {
     loading.value = true;
     error.value = null;
     const response = await axios.get(
-      `http://localhost:3000/api/tasks/${route.params.id}`,
+      `/api/tasks/${route.params.id}`,
       {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
