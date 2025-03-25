@@ -46,6 +46,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: tutor-frontend
+    volumes:
+      - frontend_build:/app/dist
     restart: always
     depends_on:
       - backend
@@ -59,9 +61,11 @@ services:
       - "80:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - frontend_build:/usr/share/nginx/html
     depends_on:
       - backend
       - frontend
 
 volumes:
   postgres_data:
+  frontend_build:
