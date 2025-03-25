@@ -5,8 +5,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies and NestJS CLI globally
 RUN npm ci
+RUN npm install -g @nestjs/cli
 
 # Copy project files
 COPY . .
