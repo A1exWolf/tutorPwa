@@ -3,7 +3,7 @@ import { ref } from "vue";
 import axios from "axios";
 import { useAuthStore } from "./auth";
 
-const API_URL = "http://localhost:3000/api";
+const API_URL = "/api";
 
 export const useTaskStore = defineStore("tasks", () => {
   const tasks = ref([]);
