@@ -623,7 +623,7 @@ const fetchTask = async () => {
     loading.value = true;
     error.value = null;
     const response = await axios.get(
-      `/api/tasks/${route.params.id}`,
+      `${import.meta.env.VITE_API_URL}/tasks/${route.params.id}`,
       {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
@@ -681,7 +681,7 @@ const gradeSubmission = async (submissionId) => {
     }
 
     await axios.post(
-      `/api/tasks/submission/${submissionId}/grade`,
+      `${import.meta.env.VITE_API_URL}/tasks/submission/${submissionId}/grade`,
       { score, feedback: sub.newFeedback || "" },
       {
         headers: {

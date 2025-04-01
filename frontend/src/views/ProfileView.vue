@@ -66,7 +66,7 @@ import StudentDashboard from "../components/dashboard/StudentDashboard.vue";
 import TeacherDashboard from "../components/dashboard/TeacherDashboard.vue";
 import axios from "axios";
 
-const API_URL = "/api";
+const API_URL = import.meta.env.VITE_API_URL;
 const authStore = useAuthStore();
 const user = computed(() => authStore.user);
 

@@ -3,7 +3,7 @@ import { ref } from "vue";
 import axios from "axios";
 import { useAuthStore } from "./auth";
 
-const API_URL = "/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const useUsersStore = defineStore("users", () => {
   const students = ref([]);
